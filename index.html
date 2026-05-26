@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFI Quiz Arena | Ultimate Telugu Cinema Challenge</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Confetti JS for Winning Animations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Tailwind Config for Premium Cinematic Theme -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        cinematic: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        arena: {
+                            black: '#0a0a0c',
+                            dark: '#121216',
+                            card: '#1a1a20',
+                            gold: '#d4af37',
+                            goldlight: '#f9e596',
+                            golddark: '#aa8c2c',
+                            accent: '#e50914' // Cinematic red touch
+                        }
+                    },
+                    boxShadow: {
+                        'gold-glow': '0 0 15px rgba(212, 175, 55, 0.3)',
+                        'gold-glow-lg': '0 0 25px rgba(212, 175, 55, 0.6)',
+                        'gold-inner': 'inset 0 0 10px rgba(212, 175, 55, 0.2)',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0a0a0c;
+            color: #ffffff;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0c; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4af37; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f9e596; 
+        }
+
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(26, 26, 32, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .glass-gold {
+            background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(10,10,12,0) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* Cinematic Background Pattern (Safe, no copyright images) */
+        .bg-cinematic {
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05) 0%, rgba(10, 10, 12, 1) 70%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 8px);
+            background-size: 100% 100%, 20px 20px;
+        }
+
+        /* Button Hover Effects */
+        .btn-gold {
+            background: linear-gradient(45deg, #aa8c2c, #d4af37, #f9e596, #d4af37);
+            background-size: 300% 300%;
+            color: #0a0a0c;
+            transition: all 0.3s ease;
+        }
+        .btn-gold:hover {
+            animation: gradient-shift 2s ease infinite;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+            transform: translateY(-2px);
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Quiz Option Selection Styles */
+        .quiz-option {
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover:not(:disabled) {
+            border-color: #d4af37;
+            background-color: rgba(212, 175, 55, 0.1);
+            transform: scale(1.02);
+        }
+        .quiz-option.selected {
+            border-color: #d4af37;
+            background-color: rgba(212, 175, 55, 0.2);
+            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        .quiz-option.correct {
+            border-color: #22c55e;
+            background-color: rgba(34, 197, 94, 0.2);
+            box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+        .quiz-option.wrong {
+            border-color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.2);
+            box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Ad Placement Placeholder styles */
+        .ad-banner {
+            width: 100%;
+            height: 90px;
+            background: #1a1a20;
+            border: 1px dashed rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        /* Silhouette Masking */
+        .silhouette {
+            filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(212,175,55,0.5));
+            opacity: 0.8;
+        }
+
+        /* Custom Notification Toast */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: #1a1a20;
+            border-left: 4px solid #d4af37;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: slideInRight 0.3s forwards, fadeOut 0.3s 2.7s forwards;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .hide { display: none !important; }
+    </style>
+</head>
+<body class="bg-arena-black text-white antialiased flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-arena-gold/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 cursor-pointer flex items-center gap-2" onclick="app.navigate('home')">
+                    <i class="fas fa-film text-arena-gold text-2xl"></i>
+                    <span class="font-cinematic font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-arena-gold to-arena-goldlight">
+                        TFI ARENA
+                    </span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-6">
+                        <a href="#" onclick="app.navigate('home')" class="hover:text-arena-gold transition px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="#categories" class="hover:text-arena-gold transition px-3 py-2 rounded-md text-sm font-medium">Categories</a>
+                        <a href="#" onclick="app.showModal('leaderboard-modal')" class="hover:text-arena-gold transition px-3 py-2 rounded-md text-sm font-medium">Leaderboard</a>
+                    </div>
+                </div>
+
+                <!-- User Stats & Profile -->
+                <div class="flex items-center gap-4">
+                    <div class="hidden sm:flex items-center gap-2 bg-arena-dark px-3 py-1 rounded-full border border-arena-gold/30">
+                        <i class="fas fa-fire text-orange-500"></i>
+                        <span id="nav-streak" class="text-sm font-bold">0</span>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-2 bg-arena-dark px-3 py-1 rounded-full border border-arena-gold/30">
+                        <i class="fas fa-star text-arena-gold"></i>
+                        <span id="nav-xp" class="text-sm font-bold">0 XP</span>
+                    </div>
+                    <button onclick="app.showModal('profile-modal')" class="w-10 h-10 rounded-full bg-gradient-to-tr from-arena-gold to-yellow-200 text-arena-black flex items-center justify-center font-bold text-lg hover:shadow-gold-glow transition">
+                        <i class="fas fa-user"></i>
+                    </button>
+                    <!-- Mobile Menu Button -->
+                    <div class="md:hidden flex items-center">
+                        <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-gray-300 hover:text-white p-2">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-arena-gold/20">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#" onclick="app.navigate('home'); document.getElementById('mobile-menu').classList.add('hidden')" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-arena-gold/10 hover:text-arena-gold">Home</a>
+                <a href="#categories" onclick="document.getElementById('mobile-menu').classList.add('hidden')" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-arena-gold/10 hover:text-arena-gold">Categories</a>
+                <a href="#" onclick="app.showModal('leaderboard-modal'); document.getElementById('mobile-menu').classList.add('hidden')" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-arena-gold/10 hover:text-arena-gold">Leaderboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main id="main-content" class="flex-grow pt-16 relative">
+        
+        <!-- HOME VIEW -->
+        <section id="home-view" class="w-full">
+            <!-- Hero Section -->
+            <div class="relative w-full h-[60vh] min-h-[400px] flex items-center justify-center bg-cinematic border-b border-arena-gold/20 overflow-hidden">
+                <!-- Abstract floating cinematic elements (CSS based) -->
+                <div class="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-arena-gold/5 blur-3xl animate-pulse-slow"></div>
+                <div class="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full bg-red-900/10 blur-3xl animate-pulse-slow delay-1000"></div>
+                
+                <div class="relative z-10 text-center px-4 max-w-4xl mx-auto animate-slide-up">
+                    <div class="inline-block mb-4 px-4 py-1 rounded-full border border-arena-gold/30 bg-arena-gold/10 text-arena-gold text-sm font-semibold tracking-widest uppercase backdrop-blur-md">
+                        #1 Telugu Cinema Gaming Platform
+                    </div>
+                    <h1 class="font-cinematic text-5xl md:text-7xl font-black mb-4 drop-shadow-2xl">
+                        <span class="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400">TFI</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-arena-gold to-yellow-200">QUIZ ARENA</span>
+                    </h1>
+                    <p class="text-lg md:text-xl text-gray-300 mb-8 font-light max-w-2xl mx-auto">
+                        Test your knowledge. Prove your fandom. The ultimate challenge for every Telugu movie lover.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="app.startRandomQuiz()" class="btn-gold px-8 py-4 rounded-full font-bold text-lg uppercase tracking-wider flex items-center justify-center gap-2">
+                            <i class="fas fa-play"></i> Quick Play
+                        </button>
+                        <a href="#categories" class="px-8 py-4 rounded-full font-bold text-lg uppercase tracking-wider border border-arena-gold text-arena-gold hover:bg-arena-gold/10 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-th-large"></i> Explore
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ad Slot (AdSense Safe Placeholder) -->
+            <div class="max-w-7xl mx-auto px-4 mt-8">
+                <div class="ad-banner">
+                    <span>Advertisement - Supports TFI Quiz Arena</span>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="max-w-7xl mx-auto px-4 py-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="glass-gold rounded-xl p-4 text-center">
+                        <div class="text-3xl font-cinematic font-black text-arena-gold mb-1" id="stat-quizzes">50+</div>
+                        <div class="text-xs text-gray-400 uppercase tracking-wide">Unique Categories</div>
+                    </div>
+                    <div class="glass-gold rounded-xl p-4 text-center">
+                        <div class="text-3xl font-cinematic font-black text-arena-gold mb-1" id="stat-questions">10k+</div>
+                        <div class="text-xs text-gray-400 uppercase tracking-wide">Questions</div>
+                    </div>
+                    <div class="glass-gold rounded-xl p-4 text-center">
+                        <div class="text-3xl font-cinematic font-black text-arena-gold mb-1">Daily</div>
+                        <div class="text-xs text-gray-400 uppercase tracking-wide">New Challenges</div>
+                    </div>
+                    <div class="glass-gold rounded-xl p-4 text-center">
+                        <div class="text-3xl font-cinematic font-black text-arena-gold mb-1">100%</div>
+                        <div class="text-xs text-gray-400 uppercase tracking-wide">Free to Play</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <section id="categories" class="max-w-7xl mx-auto px-4 py-12">
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h2 class="font-cinematic text-3xl md:text-4xl font-bold text-white mb-2 border-l-4 border-arena-gold pl-4">Game Modes</h2>
+                        <p class="text-gray-400">Select a category to start your challenge.</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="relative">
+                            <input type="text" id="search-category" placeholder="Search quizzes..." class="bg-arena-dark border border-gray-700 rounded-full py-2 px-4 pl-10 focus:outline-none focus:border-arena-gold text-white transition w-64" onkeyup="app.filterCategories()">
+                            <i class="fas fa-search absolute left-4 top-3 text-gray-500"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Search -->
+                <div class="md:hidden mb-6 relative">
+                    <input type="text" id="search-category-mobile" placeholder="Search quizzes..." class="bg-arena-dark border border-gray-700 rounded-full py-2 px-4 pl-10 focus:outline-none focus:border-arena-gold text-white transition w-full" onkeyup="app.filterCategories('mobile')">
+                    <i class="fas fa-search absolute left-4 top-3 text-gray-500"></i>
+                </div>
+
+                <!-- Category Grid -->
+                <div id="category-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Categories will be injected here via JS -->
+                </div>
+                
+                <div class="text-center mt-10">
+                    <button id="load-more-btn" onclick="app.loadMoreCategories()" class="px-6 py-2 border border-gray-600 rounded-full text-gray-300 hover:text-arena-gold hover:border-arena-gold transition">
+                        Load More Categories
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Ad Slot -->
+            <div class="max-w-7xl mx-auto px-4 my-8">
+                <div class="ad-banner">
+                    <span>Advertisement - Supports TFI Quiz Arena</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUIZ VIEW (Hidden by default) -->
+        <section id="quiz-view" class="hidden w-full max-w-4xl mx-auto px-4 py-8">
+            <div class="glass rounded-2xl p-6 md:p-10 relative overflow-hidden shadow-gold-glow">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                    <div class="flex items-center gap-3">
+                        <button onclick="app.confirmExitQuiz()" class="text-gray-400 hover:text-white transition w-10 h-10 rounded-full bg-arena-dark flex items-center justify-center">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h2 id="active-quiz-title" class="font-cinematic text-xl md:text-2xl font-bold text-arena-gold">Quiz Title</h2>
+                            <p id="active-quiz-progress-text" class="text-sm text-gray-400">Question 1 of 10</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Timer -->
+                    <div class="flex items-center gap-2 bg-arena-dark px-4 py-2 rounded-full border border-arena-gold/30">
+                        <i class="fas fa-stopwatch text-arena-gold animate-pulse"></i>
+                        <span id="quiz-timer" class="font-mono text-xl font-bold">15</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-gray-800 rounded-full h-2 mb-8">
+                    <div id="quiz-progress-bar" class="bg-gradient-to-r from-arena-golddark to-arena-gold h-2 rounded-full" style="width: 10%"></div>
+                </div>
+
+                <!-- Question Area -->
+                <div class="mb-8 min-h-[150px] flex flex-col items-center justify-center">
+                    <!-- Optional Image/Silhouette Placeholder -->
+                    <div id="question-media" class="hidden mb-6 w-48 h-48 bg-arena-dark rounded-xl border border-gray-700 flex items-center justify-center">
+                        <!-- Content injected by JS -->
+                    </div>
+                    <h3 id="question-text" class="text-2xl md:text-3xl font-medium text-center leading-tight">
+                        Loading question...
+                    </h3>
+                </div>
+
+                <!-- Options -->
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULT VIEW (Hidden by default) -->
+        <section id="result-view" class="hidden w-full max-w-3xl mx-auto px-4 py-12 text-center">
+            <div class="glass-gold rounded-3xl p-8 md:p-12 shadow-gold-glow-lg relative overflow-hidden">
+                <i class="fas fa-trophy text-6xl text-arena-gold mb-6 drop-shadow-[0_0_15px_rgba(212,175,55,0.8)] animate-bounce"></i>
+                <h2 class="font-cinematic text-4xl md:text-5xl font-black mb-2 text-white">Quiz Completed!</h2>
+                <p id="result-message" class="text-xl text-gray-300 mb-8">You are a true TFI fan!</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto">
+                    <div class="bg-arena-dark rounded-xl p-4 border border-gray-700">
+                        <div class="text-sm text-gray-400 uppercase">Score</div>
+                        <div id="result-score" class="text-3xl font-bold text-white">8/10</div>
+                    </div>
+                    <div class="bg-arena-dark rounded-xl p-4 border border-arena-gold/30">
+                        <div class="text-sm text-gray-400 uppercase">XP Gained</div>
+                        <div id="result-xp" class="text-3xl font-bold text-arena-gold">+150</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="app.navigate('home')" class="px-8 py-3 rounded-full font-bold text-white bg-gray-800 hover:bg-gray-700 transition flex items-center justify-center gap-2 border border-gray-600">
+                        <i class="fas fa-home"></i> Home
+                    </button>
+                    <button onclick="app.restartQuiz()" class="btn-gold px-8 py-3 rounded-full font-bold text-arena-black flex items-center justify-center gap-2">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                </div>
+
+                <!-- Social Share -->
+                <div class="mt-8 pt-8 border-t border-gray-700">
+                    <p class="text-sm text-gray-400 mb-4">Share your score</p>
+                    <div class="flex justify-center gap-4">
+                        <button onclick="app.share('whatsapp')" class="w-12 h-12 rounded-full bg-[#25D366] text-white flex items-center justify-center text-xl hover:scale-110 transition">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                        <button onclick="app.share('twitter')" class="w-12 h-12 rounded-full bg-black text-white border border-gray-700 flex items-center justify-center text-xl hover:scale-110 transition">
+                            <i class="fab fa-x-twitter"></i>
+                        </button>
+                        <button onclick="app.share('copy')" class="w-12 h-12 rounded-full bg-gray-700 text-white flex items-center justify-center text-xl hover:scale-110 transition">
+                            <i class="fas fa-link"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ad Slot -->
+            <div class="ad-banner mt-8">
+                <span>Advertisement</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-arena-black border-t border-gray-800 pt-12 pb-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fas fa-film text-arena-gold text-xl"></i>
+                        <span class="font-cinematic font-black text-lg tracking-wider text-white">TFI QUIZ ARENA</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 max-w-sm">
+                        The premium destination for Telugu cinema fans. Test your knowledge, earn XP, and climb the leaderboard. 100% Free to play.
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        Disclaimer: This platform uses fictional/AI-generated graphics and original text for entertainment. Not affiliated with any official film studio.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" onclick="app.navigate('home')" class="hover:text-arena-gold">Home</a></li>
+                        <li><a href="#categories" class="hover:text-arena-gold">All Quizzes</a></li>
+                        <li><a href="#" onclick="app.showModal('leaderboard-modal')" class="hover:text-arena-gold">Leaderboard</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" onclick="app.showPage('about')" class="hover:text-arena-gold">About Us</a></li>
+                        <li><a href="#" onclick="app.showPage('privacy')" class="hover:text-arena-gold">Privacy Policy</a></li>
+                        <li><a href="#" onclick="app.showPage('terms')" class="hover:text-arena-gold">Terms of Service</a></li>
+                        <li><a href="#" onclick="app.showPage('contact')" class="hover:text-arena-gold">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-6 text-center text-sm text-gray-500 flex flex-col md:flex-row justify-between items-center">
+                <p>&copy; <span id="current-year"></span> TFI Quiz Arena. All rights reserved.</p>
+                <div class="flex gap-4 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="hover:text-white"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 border border-gray-700">
+            <div class="bg-gradient-to-r from-gray-900 to-arena-black p-6 border-b border-gray-800 flex justify-between items-center">
+                <h3 class="font-cinematic font-bold text-xl text-white">Player Profile</h3>
+                <button onclick="app.hideModal('profile-modal')" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-arena-gold to-yellow-200 text-arena-black flex items-center justify-center font-bold text-3xl shadow-gold-glow">
+                        <i class="fas fa-user-ninja"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Guest Player</h4>
+                        <p class="text-sm text-arena-gold">Level <span id="profile-level">1</span> Cinephile</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-arena-dark rounded-lg p-3 border border-gray-800 text-center">
+                        <div class="text-xs text-gray-400 uppercase">Total XP</div>
+                        <div class="text-xl font-bold text-white" id="profile-xp">0</div>
+                    </div>
+                    <div class="bg-arena-dark rounded-lg p-3 border border-gray-800 text-center">
+                        <div class="text-xs text-gray-400 uppercase">Quizzes Played</div>
+                        <div class="text-xl font-bold text-white" id="profile-played">0</div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-400">Next Level</span>
+                        <span class="text-arena-gold text-xs" id="profile-xp-needed">500 XP needed</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5">
+                        <div id="profile-progress" class="bg-arena-gold h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <button onclick="app.showToast('Google login integration pending AdSense approval phase.');" class="w-full py-3 bg-white text-black font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition">
+                    <i class="fab fa-google"></i> Sign in to Save Progress
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 border border-gray-700 flex flex-col max-h-[80vh]">
+            <div class="bg-gradient-to-r from-gray-900 to-arena-black p-6 border-b border-gray-800 flex justify-between items-center shrink-0">
+                <h3 class="font-cinematic font-bold text-xl text-white flex items-center gap-2">
+                    <i class="fas fa-crown text-arena-gold"></i> Top Fans
+                </h3>
+                <button onclick="app.hideModal('leaderboard-modal')" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow custom-scrollbar">
+                <ul class="space-y-3" id="leaderboard-list">
+                    <!-- Injected by JS -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Custom Modal for "Alerts/Confirmations" -->
+    <div id="message-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-arena-dark border border-gray-700 w-full max-w-sm rounded-xl p-6 text-center transform scale-95 transition-transform duration-300 shadow-2xl">
+            <h3 id="message-title" class="text-xl font-bold text-white mb-2">Notice</h3>
+            <p id="message-text" class="text-gray-300 mb-6">Message goes here.</p>
+            <div class="flex justify-center gap-3" id="message-buttons">
+                <!-- Buttons injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Data: 50 Categories
+        const CATEGORIES = [
+            { id: 1, title: "Hero Guess Quiz", icon: "fa-user-secret", desc: "Guess the actor from the fictional silhouette.", color: "from-blue-600 to-blue-900", mode: "silhouette" },
+            { id: 2, title: "Movie Guess Quiz", icon: "fa-film", desc: "Guess the movie from the plot.", color: "from-red-600 to-red-900" },
+            { id: 3, title: "Dialogue Quiz", icon: "fa-quote-left", desc: "Who said this famous line?", color: "from-green-600 to-green-900" },
+            { id: 4, title: "Emoji Movie Quiz", icon: "fa-smile-wink", desc: "Decode the movie name from emojis.", color: "from-yellow-500 to-orange-600" },
+            { id: 5, title: "Actress Quiz", icon: "fa-star", desc: "Trivia about TFI's leading ladies.", color: "from-pink-600 to-purple-900" },
+            { id: 6, title: "Director Quiz", icon: "fa-bullhorn", desc: "Match the visionary to the film.", color: "from-indigo-600 to-indigo-900" },
+            { id: 7, title: "Music Director Quiz", icon: "fa-music", desc: "Guess who composed the blockbuster album.", color: "from-teal-600 to-teal-900" },
+            { id: 8, title: "Telugu Meme Quiz", icon: "fa-laugh-squint", desc: "Identify the movie from the viral meme template.", color: "from-orange-500 to-red-600" },
+            { id: 9, title: "Pan India Movies", icon: "fa-globe-asia", desc: "Trivia on TFI's global blockbusters.", color: "from-amber-600 to-amber-900" },
+            { id: 10, title: "90s Telugu Movies", icon: "fa-tv", desc: "Nostalgia trip to the golden era.", color: "from-fuchsia-600 to-fuchsia-900" },
+            { id: 11, title: "Guess One Frame", icon: "fa-image", desc: "Identify the film from a stylized abstract frame.", color: "from-cyan-600 to-cyan-900" },
+            { id: 12, title: "Villain Challenge", icon: "fa-skull", desc: "How well do you know TFI antagonists?", color: "from-gray-700 to-black border border-gray-600" },
+            { id: 13, title: "Comedy Scene Quiz", icon: "fa-masks-theater", desc: "Trivia on legendary comedy tracks.", color: "from-lime-600 to-lime-900" },
+            { id: 14, title: "Dialogue Finish", icon: "fa-comment-dots", desc: "Complete the iconic dialogue.", color: "from-emerald-600 to-emerald-900" },
+            { id: 15, title: "Interval Bang", icon: "fa-bolt", desc: "Questions about mind-blowing intervals.", color: "from-red-700 to-black" },
+            { id: 16, title: "Flashback Quiz", icon: "fa-history", desc: "Identify the movie by its flashback sequence.", color: "from-stone-600 to-stone-900" },
+            { id: 17, title: "Mass Entry Quiz", icon: "fa-fire", desc: "Trivia on the best hero introductions.", color: "from-orange-600 to-red-700" },
+            { id: 18, title: "BGM Guess Quiz", icon: "fa-headphones", desc: "Read the BGM description and guess.", color: "from-violet-600 to-violet-900" },
+            { id: 19, title: "Fan Wars Quiz", icon: "fa-fist-raised", desc: "Box office records and trivia clash.", color: "from-rose-600 to-rose-900" },
+            { id: 20, title: "Rapid Fire Quiz", icon: "fa-stopwatch", desc: "10 seconds per question. Go fast!", color: "from-yellow-600 to-red-600" },
+            { id: 21, title: "True or False", icon: "fa-check-circle", desc: "Quick TFI facts: True or False?", color: "from-sky-600 to-sky-900" },
+            { id: 22, title: "Match The Pair", icon: "fa-link", desc: "Match the Hero to their frequent Director.", color: "from-slate-600 to-slate-900" },
+            { id: 23, title: "Character Name", icon: "fa-id-badge", desc: "What was the character's exact name?", color: "from-zinc-600 to-zinc-900" },
+            { id: 24, title: "OTT Telugu Quiz", icon: "fa-laptop", desc: "Trivia on direct-to-digital releases.", color: "from-purple-600 to-purple-900" },
+            { id: 25, title: "Web Series Quiz", icon: "fa-clapperboard", desc: "Test your knowledge on Telugu series.", color: "from-blue-700 to-blue-900" },
+            { id: 26, title: "Director Style", icon: "fa-video", desc: "Identify the director by their signature tropes.", color: "from-green-700 to-green-900" },
+            { id: 27, title: "Dance Step Quiz", icon: "fa-shoe-prints", desc: "Questions on iconic hook steps.", color: "from-pink-500 to-rose-700" },
+            { id: 28, title: "Costume Guess", icon: "fa-tshirt", desc: "Identify the movie by the iconic outfit.", color: "from-teal-500 to-emerald-700" },
+            { id: 29, title: "Cinema History", icon: "fa-landmark", desc: "Deep dive into black & white classics.", color: "from-gray-500 to-gray-800" },
+            { id: 30, title: "Festival Release", icon: "fa-calendar-alt", desc: "Sankranthi clash trivia and more.", color: "from-yellow-500 to-amber-700" },
+            { id: 31, title: "Box Office", icon: "fa-coins", desc: "Industry hits and collection trivia.", color: "from-green-500 to-green-800" },
+            { id: 32, title: "Multi-Level Career", icon: "fa-layer-group", desc: "Chronological filmography quizzes.", color: "from-indigo-500 to-blue-800" },
+            { id: 33, title: "Meme Template", icon: "fa-images", desc: "Origin of famous comedy templates.", color: "from-orange-500 to-red-500" },
+            { id: 34, title: "Voice Hint Quiz", icon: "fa-microphone", desc: "Read the unique dialogue delivery style.", color: "from-cyan-500 to-blue-600" },
+            { id: 35, title: "Mystery Shadow", icon: "fa-user-ninja", desc: "Advanced silhouette guessing.", color: "from-gray-800 to-black" },
+            { id: 36, title: "Poster Puzzle", icon: "fa-puzzle-piece", desc: "Trivia based on text descriptions of posters.", color: "from-red-500 to-pink-700" },
+            { id: 37, title: "Guess Tagline", icon: "fa-pen-nib", desc: "Match the tagline to the movie.", color: "from-violet-500 to-purple-700" },
+            { id: 38, title: "Survival Mode", icon: "fa-heartbeat", desc: "One wrong answer and it's game over.", color: "from-red-600 to-red-900" },
+            { id: 39, title: "Daily Mega", icon: "fa-calendar-check", desc: "Fresh set of 20 questions every day.", color: "from-blue-500 to-indigo-700" },
+            { id: 40, title: "Multiplayer Battle", icon: "fa-users", desc: "Compete asynchronously with friends.", color: "from-green-500 to-teal-700" },
+            { id: 41, title: "Tournament Mode", icon: "fa-trophy", desc: "Weekly high-stakes trivia contest.", color: "from-yellow-400 to-yellow-700" },
+            { id: 42, title: "Achievement Hunt", icon: "fa-medal", desc: "Specific challenges to unlock badges.", color: "from-purple-500 to-fuchsia-700" },
+            { id: 43, title: "Hidden Quiz", icon: "fa-mask", desc: "Unlock by reaching Level 10.", color: "from-gray-900 to-gray-700" },
+            { id: 44, title: "Cinema IQ Test", icon: "fa-brain", desc: "The hardest TFI quiz on the internet.", color: "from-indigo-600 to-purple-800" },
+            { id: 45, title: "Time Attack", icon: "fa-tachometer-alt", desc: "Answer as many as possible in 60s.", color: "from-orange-600 to-orange-900" },
+            { id: 46, title: "Cinema Detective", icon: "fa-search", desc: "Piece together clues to find the movie.", color: "from-slate-700 to-zinc-900" },
+            { id: 47, title: "Ultimate Fan", icon: "fa-certificate", desc: "Get certified as a hardcore fan.", color: "from-yellow-600 to-amber-800" },
+            { id: 48, title: "Infinite Quiz", icon: "fa-infinity", desc: "Never-ending random questions.", color: "from-blue-800 to-black" },
+            { id: 49, title: "Spin Wheel Lucky", icon: "fa-dharmachakra", desc: "Random category selected for you.", color: "from-rose-500 to-pink-700" },
+            { id: 50, title: "Guess Song Emoji", icon: "fa-music", desc: "Guess the hit song from emojis.", color: "from-teal-500 to-cyan-700" }
+        ];
+
+        // Universal Question Pool (Original, non-copyrighted generic trivia)
+        const QUESTION_POOL = [
+            { q: "In typical commercial Telugu cinema, what is the action sequence before the interval called?", options: ["Climax", "Interval Bang", "Opening Fight", "Pre-climax"], a: 1 },
+            { q: "Which of these titles is commonly used to refer to a massive industry hit in TFI?", options: ["Blockbuster", "Industry Hit", "Mega Hit", "Super Hit"], a: 1 },
+            { q: "In 90s Telugu family dramas, which vehicle was most commonly associated with villains from Rayalaseema?", options: ["Tata Sumo", "Maruti 800", "Ambassador", "Scorpio"], a: 0 },
+            { q: "What is the common cinematic term used in TFI for the hero's introductory song?", options: ["Item Song", "Duet", "Intro Song / Title Song", "Pathos Song"], a: 2 },
+            { q: "Which festival usually sees the biggest box office clashes in the Telugu states?", options: ["Ugadi", "Dasara", "Sankranthi", "Diwali"], a: 2 },
+            { q: "In fictional cinematic tropes, if a hero loses his memory, what usually brings it back?", options: ["Medicine", "A hit to the head", "Sleeping", "Eating"], a: 1 },
+            { q: "Which common prop is used by strict, disciplinarian fathers in classic Telugu movies?", options: ["A book", "A walking stick", "A newspaper", "A belt"], a: 2 },
+            { q: "Complete the common dialogue trope: 'Naa peru...'", options: ["Shiva", "Surya", "Anything, usually followed by a punchline", "Raju"], a: 2 },
+            { q: "What is the typical length of a standard Telugu commercial movie?", options: ["90 mins", "120 mins", "150-160 mins", "200 mins"], a: 2 },
+            { q: "Which comedy trope involves the comedian being mistaken for someone else?", options: ["Slapstick", "Confusion Comedy / Mistaken Identity", "Dark Comedy", "Satire"], a: 1 }
+        ];
+
+        // Specific questions for "Silhouette/Hero Guess" mode (Safe SVGs)
+        const SILHOUETTE_QUESTIONS = [
+            { 
+                q: "Guess the fictional mass hero archetype based on this styling:", 
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-gray-400 silhouette"><path d="M40 20 C40 10, 60 10, 60 20 C60 30, 55 35, 50 35 C45 35, 40 30, 40 20 Z M30 40 L70 40 L80 90 L60 90 L50 60 L40 90 L20 90 Z" /><rect x="25" y="45" width="50" height="5" fill="black" opacity="0.5"/></svg>`,
+                options: ["The Angry Young Man", "The Village President", "The College Student", "The Cop"], 
+                a: 0 
+            },
+            { 
+                q: "Which classic character trope is this?", 
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-gray-400 silhouette"><path d="M45 15 C45 5, 55 5, 55 15 C55 25, 52 30, 50 30 C48 30, 45 25, 45 15 Z M25 35 C35 30, 65 30, 75 35 L80 90 L60 90 L50 50 L40 90 L20 90 Z" /><circle cx="50" cy="40" r="8" fill="none" stroke="black" stroke-width="2" opacity="0.5"/></svg>`,
+                options: ["The Faction Leader", "The Software Engineer", "The Traditional Father", "The Comedian Sidekick"], 
+                a: 2 
+            }
+        ];
+
+        // State Management
+        const appState = {
+            user: {
+                xp: 0,
+                level: 1,
+                quizzesPlayed: 0,
+                streak: 1
+            },
+            quiz: {
+                active: false,
+                currentCategory: null,
+                questions: [],
+                currentIndex: 0,
+                score: 0,
+                timer: null,
+                timeLeft: 15
+            },
+            ui: {
+                visibleCategories: 12
+            }
+        };
+
+        const app = {
+            init() {
+                this.loadUserData();
+                this.renderCategories();
+                this.updateUI();
+                
+                // Set up basic mock leaderboard
+                this.renderLeaderboard();
+            },
+
+            loadUserData() {
+                const saved = localStorage.getItem('tfiArenaUser');
+                if(saved) {
+                    appState.user = JSON.parse(saved);
+                }
+            },
+
+            saveUserData() {
+                localStorage.setItem('tfiArenaUser', JSON.stringify(appState.user));
+                this.updateUI();
+            },
+
+            updateUI() {
+                document.getElementById('nav-xp').textContent = `${appState.user.xp} XP`;
+                document.getElementById('nav-streak').textContent = appState.user.streak;
+                
+                // Update profile modal
+                document.getElementById('profile-xp').textContent = appState.user.xp;
+                document.getElementById('profile-played').textContent = appState.user.quizzesPlayed;
+                document.getElementById('profile-level').textContent = appState.user.level;
+                
+                let nextLevelXP = appState.user.level * 500;
+                let progress = (appState.user.xp / nextLevelXP) * 100;
+                document.getElementById('profile-progress').style.width = `${Math.min(progress, 100)}%`;
+                document.getElementById('profile-xp-needed').textContent = `${nextLevelXP - appState.user.xp} XP to next level`;
+            },
+
+            // Navigation
+            navigate(view) {
+                document.getElementById('home-view').classList.add('hidden');
+                document.getElementById('quiz-view').classList.add('hidden');
+                document.getElementById('result-view').classList.add('hidden');
+                
+                document.getElementById(`${view}-view`).classList.remove('hidden');
+                window.scrollTo(0, 0);
+
+                if(view === 'home') {
+                    if(appState.quiz.active) this.endQuiz(true);
+                }
+            },
+
+            // Modals & Messages
+            showModal(id) {
+                const modal = document.getElementById(id);
+                modal.classList.remove('hidden');
+                // Slight delay for animation
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.querySelector('.glass, .bg-arena-dark').classList.remove('scale-95');
+                }, 10);
+            },
+
+            hideModal(id) {
+                const modal = document.getElementById(id);
+                modal.classList.add('opacity-0');
+                modal.querySelector('.glass, .bg-arena-dark').classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            },
+
+            showMessage(title, text, buttons) {
+                document.getElementById('message-title').textContent = title;
+                document.getElementById('message-text').textContent = text;
+                
+                const btnContainer = document.getElementById('message-buttons');
+                btnContainer.innerHTML = '';
+                
+                buttons.forEach(btn => {
+                    const button = document.createElement('button');
+                    button.className = `px-6 py-2 rounded-full font-bold transition ${btn.primary ? 'btn-gold text-arena-black' : 'bg-gray-700 text-white hover:bg-gray-600'}`;
+                    button.textContent = btn.text;
+                    button.onclick = () => {
+                        this.hideModal('message-modal');
+                        if(btn.action) btn.action();
+                    };
+                    btnContainer.appendChild(button);
+                });
+                
+                this.showModal('message-modal');
+            },
+
+            showToast(message) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = 'toast flex items-center gap-3 text-white';
+                toast.innerHTML = `<i class="fas fa-info-circle text-arena-gold"></i> <span>${message}</span>`;
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    if(container.contains(toast)) {
+                        toast.remove();
+                    }
+                }, 3000);
+            },
+
+            showPage(page) {
+                this.showMessage(`${page.charAt(0).toUpperCase() + page.slice(1)}`, `This is a mockup for the ${page} page. In a full backend setup, this would load legal text.`, [
+                    { text: 'Close', primary: true }
+                ]);
+            },
+
+            renderCategories(filter = '') {
+                const container = document.getElementById('category-grid');
+                container.innerHTML = '';
+                
+                let filtered = CATEGORIES.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()));
+                
+                const toShow = filtered.slice(0, appState.ui.visibleCategories);
+                
+                toShow.forEach((cat, index) => {
+                    const delay = (index % 4) * 100; // Staggered animation
+                    const el = document.createElement('div');
+                    el.className = `glass rounded-xl p-6 cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-gold-glow border border-gray-800 hover:border-arena-gold group animate-slide-up`;
+                    el.style.animationDelay = `${delay}ms`;
+                    el.onclick = () => this.startQuiz(cat.id);
+                    
+                    el.innerHTML = `
+                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br ${cat.color || 'from-gray-700 to-gray-900'} flex items-center justify-center mb-4 group-hover:shadow-lg transition">
+                            <i class="fas ${cat.icon} text-2xl text-white drop-shadow-md"></i>
+                        </div>
+                        <h3 class="font-cinematic font-bold text-lg text-white mb-2 group-hover:text-arena-gold transition">${cat.title}</h3>
+                        <p class="text-sm text-gray-400 line-clamp-2">${cat.desc}</p>
+                    `;
+                    container.appendChild(el);
+                });
+
+                const loadMoreBtn = document.getElementById('load-more-btn');
+                if (filtered.length <= appState.ui.visibleCategories) {
+                    loadMoreBtn.classList.add('hidden');
+                } else {
+                    loadMoreBtn.classList.remove('hidden');
+                }
+            },
+
+            filterCategories(source = 'desktop') {
+                const inputId = source === 'mobile' ? 'search-category-mobile' : 'search-category';
+                const val = document.getElementById(inputId).value;
+                appState.ui.visibleCategories = 12; // reset count on search
+                this.renderCategories(val);
+            },
+
+            loadMoreCategories() {
+                appState.ui.visibleCategories += 12;
+                this.filterCategories();
+            },
+
+            renderLeaderboard() {
+                const list = document.getElementById('leaderboard-list');
+                const names = ["RamCharanFan99", "NTR_DieHard", "MaheshBabu_Cult", "Prabhas_Darling", "AA_Army", "Cinephile_TFI"];
+                let html = '';
+                for(let i=0; i<6; i++) {
+                    const isTop3 = i < 3;
+                    const colorClass = i === 0 ? 'text-yellow-400' : i === 1 ? 'text-gray-300' : i === 2 ? 'text-amber-600' : 'text-gray-500';
+                    html += `
+                        <li class="flex items-center justify-between p-3 bg-arena-dark rounded-lg border border-gray-800">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center font-bold ${colorClass}">
+                                    ${i+1}
+                                </div>
+                                <span class="font-medium text-white">${names[i]}</span>
+                            </div>
+                            <div class="text-arena-gold font-bold">${10000 - (i*1500)} XP</div>
+                        </li>
+                    `;
+                }
+                list.innerHTML = html;
+            },
+
+            startRandomQuiz() {
+                const randomId = Math.floor(Math.random() * CATEGORIES.length) + 1;
+                this.startQuiz(randomId);
+            },
+
+            startQuiz(categoryId) {
+                const category = CATEGORIES.find(c => c.id === categoryId);
+                if(!category) return;
+
+                // Setup state
+                appState.quiz.active = true;
+                appState.quiz.currentCategory = category;
+                appState.quiz.currentIndex = 0;
+                appState.quiz.score = 0;
+                
+                // Load questions (Mocking random selection from pool)
+                // If it's the silhouette quiz, load specific ones
+                if(category.mode === 'silhouette') {
+                    appState.quiz.questions = [...SILHOUETTE_QUESTIONS].sort(() => 0.5 - Math.random());
+                } else {
+                    // Shuffle and take 5 questions for demo
+                    appState.quiz.questions = [...QUESTION_POOL].sort(() => 0.5 - Math.random()).slice(0, 5);
+                }
+
+                document.getElementById('active-quiz-title').textContent = category.title;
+                
+                this.navigate('quiz');
+                this.loadQuestion();
+            },
+
+            confirmExitQuiz() {
+                this.showMessage("Exit Quiz?", "Are you sure you want to leave? Your progress will be lost.", [
+                    { text: 'Cancel', primary: false },
+                    { text: 'Exit', primary: true, action: () => this.navigate('home') }
+                ]);
+            },
+
+            loadQuestion() {
+                const q = appState.quiz.questions[appState.quiz.currentIndex];
+                const total = appState.quiz.questions.length;
+                
+                // Update Progress
+                document.getElementById('active-quiz-progress-text').textContent = `Question ${appState.quiz.currentIndex + 1} of ${total}`;
+                document.getElementById('quiz-progress-bar').style.width = `${((appState.quiz.currentIndex) / total) * 100}%`;
+                
+                // Render Question
+                document.getElementById('question-text').textContent = q.q;
+                
+                const mediaContainer = document.getElementById('question-media');
+                if(q.svg) {
+                    mediaContainer.innerHTML = q.svg;
+                    mediaContainer.classList.remove('hidden');
+                } else {
+                    mediaContainer.classList.add('hidden');
+                }
+
+                // Render Options
+                const optsContainer = document.getElementById('options-container');
+                optsContainer.innerHTML = '';
+                
+                q.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quiz-option w-full p-4 rounded-xl border-2 border-gray-700 bg-arena-dark text-left text-lg font-medium text-gray-200 hover:text-white relative overflow-hidden';
+                    btn.innerHTML = `
+                        <span class="inline-block w-8 h-8 rounded-full bg-gray-800 text-center leading-8 mr-3 text-sm font-bold">${String.fromCharCode(65 + index)}</span>
+                        ${opt}
+                    `;
+                    btn.onclick = () => this.handleAnswer(index, btn);
+                    optsContainer.appendChild(btn);
+                });
+
+                this.startTimer();
+            },
+
+            startTimer() {
+                clearInterval(appState.quiz.timer);
+                appState.quiz.timeLeft = 15;
+                const timerEl = document.getElementById('quiz-timer');
+                timerEl.textContent = appState.quiz.timeLeft;
+                timerEl.className = 'font-mono text-xl font-bold text-white'; // Reset color
+
+                appState.quiz.timer = setInterval(() => {
+                    appState.quiz.timeLeft--;
+                    timerEl.textContent = appState.quiz.timeLeft;
+                    
+                    if(appState.quiz.timeLeft <= 5) {
+                        timerEl.classList.add('text-red-500', 'animate-ping');
+                        timerEl.classList.remove('text-white');
+                    }
+
+                    if(appState.quiz.timeLeft <= 0) {
+                        clearInterval(appState.quiz.timer);
+                        this.handleTimeOut();
+                    }
+                }, 1000);
+            },
+
+            handleAnswer(selectedIndex, btnElement) {
+                clearInterval(appState.quiz.timer);
+                
+                // Disable all buttons
+                const buttons = document.querySelectorAll('.quiz-option');
+                buttons.forEach(b => b.disabled = true);
+
+                const currentQ = appState.quiz.questions[appState.quiz.currentIndex];
+                const isCorrect = selectedIndex === currentQ.a;
+
+                btnElement.classList.add('selected');
+
+                setTimeout(() => {
+                    btnElement.classList.remove('selected');
+                    if(isCorrect) {
+                        btnElement.classList.add('correct');
+                        appState.quiz.score++;
+                        // Sound logic would go here (omitted per instructions unless necessary, visual feedback suffices)
+                    } else {
+                        btnElement.classList.add('wrong');
+                        // Show correct answer
+                        buttons[currentQ.a].classList.add('correct');
+                        
+                        // Screen shake effect for wrong answer
+                        document.getElementById('quiz-view').firstElementChild.classList.add('animate-[shake_0.5s_ease-in-out]');
+                        setTimeout(()=> document.getElementById('quiz-view').firstElementChild.classList.remove('animate-[shake_0.5s_ease-in-out]'), 500);
+                    }
+
+                    setTimeout(() => {
+                        this.nextQuestion();
+                    }, 1500);
+                }, 500);
+            },
+
+            handleTimeOut() {
+                const buttons = document.querySelectorAll('.quiz-option');
+                buttons.forEach(b => b.disabled = true);
+                
+                const currentQ = appState.quiz.questions[appState.quiz.currentIndex];
+                buttons[currentQ.a].classList.add('correct');
+                
+                this.showToast("Time's up!");
+
+                setTimeout(() => {
+                    this.nextQuestion();
+                }, 2000);
+            },
+
+            nextQuestion() {
+                appState.quiz.currentIndex++;
+                if(appState.quiz.currentIndex < appState.quiz.questions.length) {
+                    this.loadQuestion();
+                } else {
+                    this.endQuiz(false);
+                }
+            },
+
+            endQuiz(forcedExit) {
+                clearInterval(appState.quiz.timer);
+                appState.quiz.active = false;
+                
+                if(forcedExit) return;
+
+                const total = appState.quiz.questions.length;
+                const score = appState.quiz.score;
+                const xpEarned = score * 20; // 20 XP per correct answer
+                
+                // Update User Stats
+                appState.user.xp += xpEarned;
+                appState.user.quizzesPlayed++;
+                
+                // Level up check
+                if(appState.user.xp >= appState.user.level * 500) {
+                    appState.user.level++;
+                    this.showToast(`Level Up! You are now Level ${appState.user.level}`);
+                }
+                
+                this.saveUserData();
+
+                // Setup Result View
+                document.getElementById('result-score').textContent = `${score}/${total}`;
+                document.getElementById('result-xp').textContent = `+${xpEarned}`;
+                
+                const msgEl = document.getElementById('result-message');
+                if(score === total) {
+                    msgEl.textContent = "Perfect! You are a Die-Hard TFI Fan!";
+                    this.triggerConfetti();
+                } else if(score >= total/2) {
+                    msgEl.textContent = "Great job! You know your movies well.";
+                    this.triggerConfetti(true); // minor confetti
+                } else {
+                    msgEl.textContent = "Good try! Watch more movies and come back.";
+                }
+
+                this.navigate('result');
+            },
+
+            restartQuiz() {
+                this.startQuiz(appState.quiz.currentCategory.id);
+            },
+
+            triggerConfetti(minor = false) {
+                if(typeof confetti !== 'undefined') {
+                    if(minor) {
+                        confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#d4af37', '#ffffff'] });
+                    } else {
+                        var duration = 3 * 1000;
+                        var animationEnd = Date.now() + duration;
+                        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+                        var interval = setInterval(function() {
+                            var timeLeft = animationEnd - Date.now();
+                            if (timeLeft <= 0) { return clearInterval(interval); }
+                            var particleCount = 50 * (timeLeft / duration);
+                            confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#d4af37', '#e50914', '#ffffff'] }));
+                        }, 250);
+                    }
+                }
+            },
+
+            share(platform) {
+                const text = `I just scored ${appState.quiz.score}/${appState.quiz.questions.length} on "${appState.quiz.currentCategory.title}" at TFI Quiz Arena! Can you beat me? 🎬🔥`;
+                const url = window.location.href;
+                
+                if(platform === 'whatsapp') {
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + url)}`, '_blank');
+                } else if(platform === 'twitter') {
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+                } else if(platform === 'copy') {
+                    // Fallback for iframe environments based on instruction
+                    try {
+                        const tempInput = document.createElement("textarea");
+                        tempInput.value = text + " " + url;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(tempInput);
+                        this.showToast("Link copied to clipboard!");
+                    } catch (err) {
+                        this.showToast("Failed to copy link.");
+                    }
+                }
+            }
+        };
+
+        // Add custom keyframes programmatically for the shake effect
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize App on load
+        window.onload = () => {
+            app.init();
+        };
+
+    </script>
+</body>
+</html>
